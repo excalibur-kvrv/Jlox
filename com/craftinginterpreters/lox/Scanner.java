@@ -124,7 +124,7 @@ class Scanner {
     advance(); 
     advance();
     
-    // Trim surrounding quotes.
+    // Trim surrounding /* */.
     String value = source.substring(start + 2, current - 2);
     addToken(MULTILINECOMMENT, value);
   }
