@@ -12,7 +12,7 @@ class Parser {
    * term -> factor (("-" | "+") factor)*
    * factor -> unary (("/" | "*") unary)*
    * unary -> ("!"|"-") unary | primary
-   * primary -> NUMBER | STRING | "true" | "false" | "nil" | "(" expressopn ")"
+   * primary -> NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")"
    */
 
   private static class ParserError extends RuntimeException {}
