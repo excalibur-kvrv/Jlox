@@ -7,7 +7,9 @@ import static com.craftinginterpreters.lox.TokenType.*;
 class Parser {
   /*
    * Grammer
-   * program -> statement* EOF
+   * program -> declaration* EOF
+   * declaration -> varDecl | statement
+   * varDecl -> "var" IDENTIFIER ( "=" expression)? ";"
    * statement -> exprStmt | printStmt
    * exprStmt -> expression ";"
    * printStmt -> "print" expression ";"
@@ -17,7 +19,7 @@ class Parser {
    * term -> factor (("-" | "+") factor)*
    * factor -> unary (("/" | "*") unary)*
    * unary -> ("!"|"-") unary | primary
-   * primary -> NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")"
+   * primary -> NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER
    */
 
   private static class ParserError extends RuntimeException {}
@@ -135,6 +137,10 @@ class Parser {
       return new Expr.Grouping(expr);
     }
 
+    if (match(TokenType.IDENTIFIER)) {
+      return new Expr.Variable(previous());
+    }
+
     throw error(peek(), "Expect expression.");
   }
 
@@ -172,7 +178,7 @@ class Parser {
     List<Stmt> statements = new ArrayList<>();
     
     while (!isAtEnd()) {
-      statements.add(statement());
+      statements.add(declaration());
     }
 
     return statements;
@@ -181,6 +187,28 @@ class Parser {
   private Stmt statement() {
     if (match(TokenType.PRINT)) return printStatement();
     return expressionStatement();
+  }
+
+  private Stmt declaration() {
+    try {
+      if (match(TokenType.VAR)) return varDeclaration();
+      return statement();
+    } catch (ParserError error) {
+      synchronize();
+      return null;
+    }
+  }
+
+  private Stmt varDeclaration() {
+    Token name = consume(TokenType.IDENTIFIER, "Expect variable name.");
+
+    Expr initializer = null;
+    if (match(TokenType.EQUAL)) {
+      initializer = expression();
+    }
+
+    consume(SEMICOLON, "Expect ';' after variable declaration.");
+    return new Stmt.Var(name, initializer);
   }
 
   private Stmt printStatement() {
