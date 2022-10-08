@@ -13,7 +13,8 @@ class Parser {
    * statement -> exprStmt | printStmt
    * exprStmt -> expression ";"
    * printStmt -> "print" expression ";"
-   * expression -> equality
+   * expression -> assignment
+   * assignment -> IDENTIFIER "=" assignment | equality
    * equality -> comparison (( "!=" | "==" ) comparison)*
    * comparison -> term (( ">" | ">=" | "<" | "<=") term)*
    * term -> factor (("-" | "+") factor)*
@@ -31,7 +32,25 @@ class Parser {
   }
 
   private Expr expression() {
-    return equality();
+    return assignment();
+  }
+
+  private Expr assignment() {
+    Expr expr = equality();
+
+    if (match(TokenType.EQUAL)) {
+      Token equals = previous();
+      Expr value = assignment();
+
+      if (expr instanceof Expr.Variable) {
+        Token name = ((Expr.Variable)expr).name;
+        return new Expr.Assign(name, value);
+      }
+
+      error(equals, "Invalid assignment targte.");
+    }
+
+    return expr;
   }
 
   private Expr equality() {
@@ -169,6 +188,8 @@ class Parser {
         case VAR:
         case WHILE:
         return;
+        default:
+          break;
       }
     }
     advance();
