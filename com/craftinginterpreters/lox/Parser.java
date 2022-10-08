@@ -1,11 +1,16 @@
 package com.craftinginterpreters.lox;
 
+import java.util.ArrayList;
 import java.util.List;
 import static com.craftinginterpreters.lox.TokenType.*;
 
 class Parser {
   /*
    * Grammer
+   * program -> statement* EOF
+   * statement -> exprStmt | printStmt
+   * exprStmt -> expression ";"
+   * printStmt -> "print" expression ";"
    * expression -> equality
    * equality -> comparison (( "!=" | "==" ) comparison)*
    * comparison -> term (( ">" | ">=" | "<" | "<=") term)*
@@ -163,11 +168,30 @@ class Parser {
     advance();
   }
 
-  Expr parse() {
-    try {
-      return expression();
-    } catch (ParserError error) {
-      return null;
+  List<Stmt> parse() {
+    List<Stmt> statements = new ArrayList<>();
+    
+    while (!isAtEnd()) {
+      statements.add(statement());
     }
+
+    return statements;
+  }
+
+  private Stmt statement() {
+    if (match(TokenType.PRINT)) return printStatement();
+    return expressionStatement();
+  }
+
+  private Stmt printStatement() {
+    Expr value = expression();
+    consume(TokenType.SEMICOLON, "Expect ';' after value.");
+    return new Stmt.Print(value);
+  }
+
+  private Stmt expressionStatement() {
+    Expr expr = expression();
+    consume(TokenType.SEMICOLON, "Expect ';' after expression.");
+    return new Stmt.Expression(expr);
   }
 }
