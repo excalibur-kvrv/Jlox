@@ -1,7 +1,12 @@
-/* Hi 
-there
-This is a multiline comment
-*/
+var a = "global a";
+var b = "global b";
 
-// This is a single line comment
-class Test {}
+print "global scope: " + a;
+print "global scope: " + b;
+{
+  print a;
+  print b;
+  var a = 1;
+  var b = 2;
+  print a + b;
+}
