@@ -10,7 +10,8 @@ class Parser {
    * program -> declaration* EOF
    * declaration -> varDecl | statement
    * varDecl -> "var" IDENTIFIER ( "=" expression)? ";"
-   * statement -> exprStmt | ifStmt | printStmt | block
+   * statement -> exprStmt | ifStmt | printStmt | whileStmt | block
+   * whileStmt -> "while" "(" expression ")" statement
    * ifStmt -> "if" "(" expression ")" statement ( "else" statement )? 
    * block -> "{" declaration* "}"
    * exprStmt -> expression ";"
@@ -236,6 +237,7 @@ class Parser {
   private Stmt statement() {
     if (match(TokenType.IF)) return ifStatement();
     if (match(TokenType.PRINT)) return printStatement();
+    if (match(TokenType.WHILE)) return whileStatement();
     if (match(TokenType.LEFT_BRACE)) return new Stmt.Block(block());
     return expressionStatement();
   }
@@ -252,6 +254,14 @@ class Parser {
     }
 
     return new Stmt.If(condition, thenBranch, elseBranch);
+  }
+
+  private Stmt whileStatement() {
+    consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.");
+    Expr condition = expression();
+    consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.");
+    Stmt body = statement();
+    return new Stmt.While(condition, body);
   }
 
   private List<Stmt> block() {
