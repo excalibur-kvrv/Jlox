@@ -10,3 +10,13 @@ print "global scope: " + b;
   var b = 2;
   print a + b;
 }
+
+// fib program
+var a = 0;
+var temp;
+
+for (var b = 1; a < 10000; b = temp + b) {
+  print a;
+  temp = a;
+  a = b;
+}
