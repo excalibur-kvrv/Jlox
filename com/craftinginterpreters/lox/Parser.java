@@ -16,7 +16,9 @@ class Parser {
    * exprStmt -> expression ";"
    * printStmt -> "print" expression ";"
    * expression -> assignment
-   * assignment -> IDENTIFIER "=" assignment | equality
+   * assignment -> IDENTIFIER "=" assignment | logic_or
+   * logic_or -> logic_and ( "or" logic_and )*
+   * logic_and -> equality ( "and" equality )*
    * equality -> comparison (( "!=" | "==" ) comparison)*
    * comparison -> term (( ">" | ">=" | "<" | "<=") term)*
    * term -> factor (("-" | "+") factor)*
@@ -38,7 +40,7 @@ class Parser {
   }
 
   private Expr assignment() {
-    Expr expr = equality();
+    Expr expr = or();
 
     if (match(TokenType.EQUAL)) {
       Token equals = previous();
@@ -50,6 +52,30 @@ class Parser {
       }
 
       error(equals, "Invalid assignment targte.");
+    }
+
+    return expr;
+  }
+
+  private Expr or() {
+    Expr expr = and();
+
+    while (match(TokenType.OR)) {
+      Token operator = previous();
+      Expr right = and();
+      expr = new Expr.Logical(expr, operator, right);
+    }
+
+    return expr;
+  }
+
+  private Expr and() {
+    Expr expr = equality();
+
+    while(match(TokenType.AND)) {
+      Token operator = previous();
+      Expr right = equality();
+      expr = new Expr.Logical(expr, operator, right);
     }
 
     return expr;
