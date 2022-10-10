@@ -14,7 +14,8 @@ class Parser {
    * function -> IDENTIFIER "(" parameters? ")" block
    * parameters -> IDENTIFIER ( "," IDENTIFIER )*
    * varDecl -> "var" IDENTIFIER ( "=" expression)? ";"
-   * statement -> exprStmt | forStmt | ifStmt | printStmt | whileStmt | block
+   * statement -> exprStmt | forStmt | ifStmt | printStmt | returnStmt | whileStmt | block
+   * returnStmt -> "return" expression? ";"
    * whileStmt -> "while" "(" expression ")" statement
    * forStmt -> "for" "(" (varDecl | exprStmt | ";") expression? ";" expression? ")" statement
    * ifStmt -> "if" "(" expression ")" statement ( "else" statement )? 
@@ -274,9 +275,21 @@ class Parser {
     if (match(TokenType.FOR)) return forStatement();
     if (match(TokenType.IF)) return ifStatement();
     if (match(TokenType.PRINT)) return printStatement();
+    if (match(TokenType.RETURN)) return returnStatement();
     if (match(TokenType.WHILE)) return whileStatement();
     if (match(TokenType.LEFT_BRACE)) return new Stmt.Block(block());
     return expressionStatement();
+  }
+
+  private Stmt returnStatement() {
+    Token keyword = previous();
+    Expr value = null;
+    if (!check(TokenType.SEMICOLON)) {
+      value = expression();
+    }
+
+    consume(TokenType.SEMICOLON, "Expect ';' after return value.");
+    return new Stmt.Return(keyword, value);
   }
 
   private Stmt forStatement() {
