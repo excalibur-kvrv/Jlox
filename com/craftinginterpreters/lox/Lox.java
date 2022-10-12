@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-
 public class Lox {
   private static final Interpreter interpreter = new Interpreter();
   static boolean hadError = false;
@@ -28,8 +27,10 @@ public class Lox {
   private static void runFile(String path) throws IOException {
     byte[] bytes = Files.readAllBytes(Paths.get(path));
     run(new String(bytes, Charset.defaultCharset()));
-    if (hadError) System.exit(65);
-    if (hadRuntimeError) System.exit(70);
+    if (hadError)
+      System.exit(65);
+    if (hadRuntimeError)
+      System.exit(70);
   }
 
   private static void runPrompt() throws IOException {
@@ -39,7 +40,8 @@ public class Lox {
     for (;;) {
       System.out.print("> ");
       String line = reader.readLine();
-      if (line == null) break;
+      if (line == null)
+        break;
       run(line);
       hadError = false;
     }
@@ -52,6 +54,13 @@ public class Lox {
     Parser parser = new Parser(tokens);
     List<Stmt> statements = parser.parse();
 
+    if (hadError)
+      return;
+
+    Resolver resolver = new Resolver(interpreter);
+    resolver.resolve(statements);
+
+    //top if there was a resolution error
     if (hadError) return;
 
     // System.out.println(new AstPrinter().print(expr));
