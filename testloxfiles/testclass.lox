@@ -1,0 +1,7 @@
+class DevTest {
+  helloWorld() {
+    return "Hello World";
+  }
+}
+
+print DevTest;
