@@ -248,6 +248,8 @@ class Parser {
       return new Expr.Variable(previous());
     }
 
+    if (match(TokenType.THIS)) return new Expr.This(previous());
+
     throw error(peek(), "Expect expression.");
   }
 
